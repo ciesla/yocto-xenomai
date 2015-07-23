@@ -20,7 +20,7 @@ do_prepare_kernel () {
     linux_src="${S}"
 
     #set xenomai source directory 
-    xenomai_src="${TMPDIR}/work/${MACHINE}-poky-${TARGET_OS}/${PN}/${EXTENDPE}${PV}-${PR}/xenomai-3.0-rc4"
+    xenomai_src="${TMPDIR}/work/${MACHINE}-poky-${TARGET_OS}/${PN}/${EXTENDPE}${PV}-${PR}/xenomai-3.0-rc5"
 
     #prepare kernel
 	# arch=arm
