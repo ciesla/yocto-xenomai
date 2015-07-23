@@ -7,6 +7,10 @@ PR = "r0"
 
 require xenomai.inc
 
+SRC_URI = "http://xenomai.org/downloads/xenomai/testing/latest/xenomai-${PV}.tar.bz2"
+SRC_URI[md5sum] = "fcc997bb5c5c286e4524977d4f992cf3"
+SRC_URI[sha256sum] = "8447a6cb99fe9c33deace109ae61227050ed3c35343221f964bf37f32bbfed7a"
+
 do_configure() {
 	cd ${S}
 

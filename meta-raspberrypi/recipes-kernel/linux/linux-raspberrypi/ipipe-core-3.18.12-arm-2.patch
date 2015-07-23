@@ -1643,7 +1643,7 @@ index bb28af7..780ca50 100644
  static inline void sp804_clockevents_init(void __iomem *base, unsigned int irq, const char *name)
 diff --git a/arch/arm/include/asm/ipipe.h b/arch/arm/include/asm/ipipe.h
 new file mode 100644
-index 0000000..0aca4cf
+index 0000000..687c054
 --- /dev/null
 +++ b/arch/arm/include/asm/ipipe.h
 @@ -0,0 +1,272 @@
@@ -1691,7 +1691,7 @@ index 0000000..0aca4cf
 +#include <linux/jump_label.h>
 +#include <linux/ipipe_trace.h>
 +
-+#define IPIPE_CORE_RELEASE	1
++#define IPIPE_CORE_RELEASE	2
 +
 +struct ipipe_domain;
 +
@@ -7287,7 +7287,7 @@ index 0000000..2172f98
 +	imx5_pm_init();
 +}
 diff --git a/arch/arm/mach-imx/time.c b/arch/arm/mach-imx/time.c
-index 15d18e1..f8bb94d 100644
+index 15d18e1..ed7033d 100644
 --- a/arch/arm/mach-imx/time.c
 +++ b/arch/arm/mach-imx/time.c
 @@ -31,6 +31,8 @@
@@ -7376,7 +7376,6 @@ index 15d18e1..f8bb94d 100644
  	mxc_clocksource_init(clk_per);
 +#ifdef CONFIG_IPIPE
 +	if (num_online_cpus() == 1) {
-+		tsc_info.freq = clk_get_rate(clk_per);
 +		unsigned long phys = timer_base_phys;
 +		unsigned long virt = (unsigned long)timer_base;
 +
@@ -7387,6 +7386,7 @@ index 15d18e1..f8bb94d 100644
 +			tsc_info.u.counter_paddr = phys + V2_TCN;
 +			tsc_info.counter_vaddr = virt + V2_TCN;
 +		}
++		tsc_info.freq = clk_get_rate(clk_per);
 +		__ipipe_tsc_register(&tsc_info);
 +	}
 +
@@ -11007,10 +11007,10 @@ index 5e85ed3..ababa17 100644
  		info.flags = 0;
  		info.low_limit = mm->mmap_base;
 diff --git a/arch/arm/mm/pgd.c b/arch/arm/mm/pgd.c
-index 2493795..a4aafb5 100644
+index 2493795..a1186ca 100644
 --- a/arch/arm/mm/pgd.c
 +++ b/arch/arm/mm/pgd.c
-@@ -27,6 +27,159 @@
+@@ -27,6 +27,176 @@
  #define __pgd_free(pgd)	free_pages((unsigned long)pgd, 2)
  #endif
  
@@ -11060,7 +11060,12 @@ index 2493795..a4aafb5 100644
 +	return h;
 +}
 +
-+static inline void pgd_holder_insert(struct pgd_holder *h)
++static inline void pgd_holder_drop(struct pgd_holder *h)
++{
++	kfree(h);
++}
++
++static inline int pgd_holder_insert(struct pgd_holder *h)
 +{
 +	struct rb_node **rbp = &pgd_table.rb_node, *parent = NULL;
 +	struct pgd_holder *p;
@@ -11071,13 +11076,16 @@ index 2493795..a4aafb5 100644
 +		if ((unsigned long)h->pgd < (unsigned long)p->pgd)
 +			rbp = &(*rbp)->rb_left;
 +		else {
-+			BUG_ON(h->pgd == p->pgd);
++			if (h->pgd == p->pgd)
++				return 0;
 +			rbp = &(*rbp)->rb_right;
 +		}
 +	}
 +
 +  	rb_link_node(&h->rb, parent, rbp);
 +  	rb_insert_color(&h->rb, &pgd_table);
++
++	return 1;
 +}
 +
 +static inline void pgd_holder_free(pgd_t *pgd)
@@ -11097,39 +11105,46 @@ index 2493795..a4aafb5 100644
 +		else {
 +			rb_erase(node, &pgd_table);
 +			pgd_table_unlock(flags);
-+			kfree(p);
++			pgd_holder_drop(p);
 +			return;
 +		}
 +	}
 +
 +	pgd_table_unlock(flags);
-+
-+	BUG();
 +}
 +
 +static void pin_k_mapping(pgd_t *pgd, unsigned long addr)
 +{
-+	unsigned int index = pgd_index(addr);
++	unsigned int index;
 +	pud_t *pud, *pud_k;
 +	pmd_t *pmd, *pmd_k;
 +	pgd_t *pgd_k;
 +
++	index = pgd_index(addr);
 +	pgd += index;
 +	pgd_k = init_mm.pgd + index;
 +
++	if (pgd_none(*pgd_k))
++		return;
++	
 +	if (!pgd_present(*pgd))
 +		set_pgd(pgd, *pgd_k);
 +
 +	pud = pud_offset(pgd, addr);
 +	pud_k = pud_offset(pgd_k, addr);
 +
++	if (pud_none(*pud_k))
++		return;
++	
 +	if (!pud_present(*pud))
 +		set_pud(pud, *pud_k);
 +
-+	pmd   = pmd_offset(pud, addr);
++	pmd = pmd_offset(pud, addr);
 +	pmd_k = pmd_offset(pud_k, addr);
 +
-+	copy_pmd(pmd, pmd_k);
++	index = IS_ENABLED(ARM_LPAE) ? 0 : (addr >> SECTION_SHIFT) & 1;
++	if (!pmd_none(pmd_k[index]))
++		copy_pmd(pmd, pmd_k);
 +}
 +
 +void __ipipe_pin_range_globally(unsigned long start, unsigned long end)
@@ -11161,7 +11176,9 @@ index 2493795..a4aafb5 100644
 +	return NULL;
 +}
 +
-+static inline void pgd_holder_insert(struct pgd_holder *h) { }
++static inline void pgd_holder_drop(struct pgd_holder *h) { }
++
++static inline int pgd_holder_insert(struct pgd_holder *h) { return 1; }
 +
 +static inline void pgd_holder_free(pgd_t *pgd) { }
 +
@@ -11170,16 +11187,17 @@ index 2493795..a4aafb5 100644
  /*
   * need to get a 16k page for level 1
   */
-@@ -36,6 +189,8 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
+@@ -36,6 +206,9 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
  	pud_t *new_pud, *init_pud;
  	pmd_t *new_pmd, *init_pmd;
  	pte_t *new_pte, *init_pte;
 +	struct pgd_holder *h;
 +	unsigned long flags;
++	int ret;
  
  	new_pgd = __pgd_alloc();
  	if (!new_pgd)
-@@ -47,9 +202,13 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
+@@ -47,9 +220,15 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
  	 * Copy over the kernel and IO PGD entries
  	 */
  	init_pgd = pgd_offset_k(0);
@@ -11188,12 +11206,14 @@ index 2493795..a4aafb5 100644
  	memcpy(new_pgd + USER_PTRS_PER_PGD, init_pgd + USER_PTRS_PER_PGD,
  		       (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
  
-+	pgd_holder_insert(h);
++	ret = pgd_holder_insert(h);
 +	pgd_table_unlock(flags);
++	if (!ret)
++		pgd_holder_drop(h);
  	clean_dcache_area(new_pgd, PTRS_PER_PGD * sizeof(pgd_t));
  
  #ifdef CONFIG_ARM_LPAE
-@@ -67,6 +226,10 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
+@@ -67,6 +246,10 @@ pgd_t *pgd_alloc(struct mm_struct *mm)
  #endif
  
  	if (!vectors_high()) {
@@ -11204,7 +11224,7 @@ index 2493795..a4aafb5 100644
  		/*
  		 * On ARM, first page must always be allocated since it
  		 * contains the machine vectors. The vectors are always high
-@@ -119,7 +282,7 @@ void pgd_free(struct mm_struct *mm, pgd_t *pgd_base)
+@@ -119,7 +302,7 @@ void pgd_free(struct mm_struct *mm, pgd_t *pgd_base)
  	if (pgd_none_or_clear_bad(pgd))
  		goto no_pgd;
  
@@ -11213,7 +11233,7 @@ index 2493795..a4aafb5 100644
  	if (pud_none_or_clear_bad(pud))
  		goto no_pud;
  
-@@ -137,6 +300,8 @@ no_pud:
+@@ -137,6 +320,8 @@ no_pud:
  	pgd_clear(pgd);
  	pud_free(mm, pud);
  no_pgd:

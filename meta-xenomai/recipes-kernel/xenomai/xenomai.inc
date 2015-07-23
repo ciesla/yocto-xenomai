@@ -5,11 +5,6 @@ SECTION = "RTOS"
 HOMEPAGE = "http://www.xenomai.org/"
 PR = "r0"
 
-SRC_URI = "http://download.gna.org/xenomai/testing/latest/xenomai-${PV}.tar.bz2"
-
-SRC_URI[md5sum] = "281790d044007ddbfc62a38a51520dd5"
-SRC_URI[sha256sum] = "349d257ace595b07edb3bea4f90abb2b8bdbcfc15463c99739b6d7bdad499610"
-
 S = "${WORKDIR}/xenomai-${PV}"
 
 inherit autotools
