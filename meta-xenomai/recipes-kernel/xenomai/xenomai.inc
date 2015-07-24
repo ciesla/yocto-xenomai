@@ -1,6 +1,6 @@
 DESCRIPTION = "Xenomai RTOS userspace libraries and tools for dual kernel (cobalt) implementation"
 LICENSE = "GPL"
-LIC_FILES_CHKSUM = "file://include/COPYING;md5=60faa041c8d4a75ab87e115a9469d94d"
+LIC_FILES_CHKSUM = "file://include/COPYING;md5=79ed705ccb9481bf9e7026b99f4e2b0e"
 SECTION = "RTOS"
 HOMEPAGE = "http://www.xenomai.org/"
 PR = "r0"
