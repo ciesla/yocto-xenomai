@@ -1,0 +1,14 @@
+define KMACHINE ape140x
+define KTYPE standard
+define KARCH i386
+
+include ktypes/standard/standard.scc
+branch ape140x
+
+include ape140x.scc
+
+# default policy for standard kernels
+include cfg/usb-mass-storage.scc
+include cfg/boot-live.scc
+include features/latencytop/latencytop.scc
+include features/profiling/profiling.scc

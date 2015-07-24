@@ -1,0 +1,8 @@
+define KMACHINE ape140x
+define KTYPE tiny
+define KARCH i386
+
+include ktypes/tiny/tiny.scc
+branch ape140x
+
+include ape140x.scc
