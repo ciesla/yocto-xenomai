@@ -17,6 +17,9 @@ XENOMAI_SRC_PATH = "/usr/src/xenomai"
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
+RDEPENDS_${PN} += "bash"
+RDEPENDS_${PN}-dev += "make bash"
+
 FILES_${PN}-dbg += "/usr/xenomai/bin/.debug/* \
 			/usr/xenomai/sbin/.debug/* \
 			/usr/xenomai/lib/.debug/* \
@@ -33,6 +36,8 @@ FILES_${PN} += "/usr/xenomai/bin/* \
 		/usr/xenomai/lib/dynlist.ld \
 		/usr/xenomai/lib/cobalt.wrappers \
 		/usr/xenomai/etc/* \
+		/usr/xenomai/lib/xenomai \
+		/usr/xenomai/lib/xenomai/bootstrap.o \
 		"
 		
 FILES_${PN}-dev += "/usr/xenomai/include/* \
