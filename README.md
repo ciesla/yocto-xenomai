@@ -1,3 +1,5 @@
+**************** WORK IN PROGRESS REPOSITORY NOT READY TO BUILD BE PATIENT :) *******************
+
 # yocto-xenomai
 Yocto BSP collection for xenomai 3.0 support
 
