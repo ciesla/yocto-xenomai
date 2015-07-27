@@ -1,0 +1,17 @@
+kconf hardware vmware.cfg
+
+include features/intel-e1xxxx/intel-e100.scc
+include features/intel-e1xxxx/intel-e1xxxx.scc
+
+
+include features/serial/8250.scc
+include features/ericsson-3g/f5521gw.scc
+
+include cfg/vesafb.scc
+
+include cfg/usb-mass-storage.scc
+include cfg/boot-live.scc
+include features/power/intel.scc
+
+kconf hardware vmware-user-config.cfg
+include vmware-user-patches.scc

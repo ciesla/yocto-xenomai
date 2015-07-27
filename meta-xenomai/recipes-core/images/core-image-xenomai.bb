@@ -6,3 +6,5 @@ IMAGE_INSTALL += "xenomai"
 LICENSE = "MIT"
 
 inherit core-image
+
+PREFERRED_PROVIDER_virtual/kernel = "linux-yocto-xenomai"

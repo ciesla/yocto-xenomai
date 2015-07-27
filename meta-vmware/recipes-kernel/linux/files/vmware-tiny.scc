@@ -1,0 +1,8 @@
+define KMACHINE vmware
+define KTYPE tiny
+define KARCH i386
+
+include ktypes/tiny/tiny.scc
+branch vmware
+
+include vmware.scc
