@@ -5,4 +5,4 @@
 <ClientMetaData>
 <clientMetaDataAttributes/>
 <HistoryEventList/></ClientMetaData>
-<vmxPathName type="string">ipc-platform-vmware.vmx</vmxPathName></VM></Foundry>
+<vmxPathName type="string">core-image-xenomai.vmx</vmxPathName></VM></Foundry>

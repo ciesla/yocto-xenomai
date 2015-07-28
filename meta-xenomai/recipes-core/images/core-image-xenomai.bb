@@ -1,10 +1,14 @@
-SUMMARY = "A console-only image that fully supports the target device hardware with xenomai support."
+SUMMARY = "A small image just capable of allowing a device to boot."
 
-IMAGE_FEATURES += "splash"
-IMAGE_INSTALL += "xenomai"
+IMAGE_INSTALL = "packagegroup-core-boot ${ROOTFS_PKGMANAGE_BOOTSTRAP} ${CORE_IMAGE_EXTRA_INSTALL}"
+
+IMAGE_LINGUAS = " "
 
 LICENSE = "MIT"
 
 inherit core-image
 
-PREFERRED_PROVIDER_virtual/kernel = "linux-yocto-xenomai"
+IMAGE_ROOTFS_SIZE ?= "8192"
+
+IMAGE_INSTALL += "xenomai"
+

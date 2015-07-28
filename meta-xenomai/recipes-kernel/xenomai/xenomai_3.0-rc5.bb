@@ -1,5 +1,5 @@
 DESCRIPTION = "Xenomai RTOS userspace libraries and tools for dual kernel (cobalt) implementation"
-LICENSE = "GPL"
+LICENSE = "GPLv1"
 LIC_FILES_CHKSUM = "file://include/COPYING;md5=79ed705ccb9481bf9e7026b99f4e2b0e"
 SECTION = "RTOS"
 HOMEPAGE = "http://www.xenomai.org/"
@@ -40,7 +40,6 @@ do_install () {
 	rm -fR ${D}/dev
 	
 	#Rename files to standard name (without host, ex i586-poky-linux)
-	#mv ${D}/usr/xenomai/bin/${HOST_SYS}-clock_settime ${D}/usr/xenomai/bin/clock_settime
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-clocktest ${D}/usr/xenomai/bin/clocktest
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-cmd_bits ${D}/usr/xenomai/bin/cmd_bits
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-cmd_read ${D}/usr/xenomai/bin/cmd_read
@@ -50,13 +49,10 @@ do_install () {
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-insn_read ${D}/usr/xenomai/bin/insn_read
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-insn_write ${D}/usr/xenomai/bin/insn_write
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-latency ${D}/usr/xenomai/bin/latency
-	#mv ${D}/usr/xenomai/bin/${HOST_SYS}-leaks ${D}/usr/xenomai/bin/leaks
-	#mv ${D}/usr/xenomai/bin/${HOST_SYS}-mq_select ${D}/usr/xenomai/bin/mq_select
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-rtcanrecv ${D}/usr/xenomai/bin/rtcanrecv
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-rtcansend ${D}/usr/xenomai/bin/rtcansend
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-smokey ${D}/usr/xenomai/bin/smokey
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-switchtest ${D}/usr/xenomai/bin/switchtest
-	#mv ${D}/usr/xenomai/bin/${HOST_SYS}-timerfd ${D}/usr/xenomai/bin/timerfd
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-wf_generate ${D}/usr/xenomai/bin/wf_generate
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-wrap-link.sh ${D}/usr/xenomai/bin/wrap-link.sh
 	mv ${D}/usr/xenomai/bin/${HOST_SYS}-xeno ${D}/usr/xenomai/bin/xeno
